@@ -11,9 +11,11 @@ public:
 
 		scene->addChild(layer);
 		return scene;
-	};
+	}
 
 	virtual bool init();
+
+	cocos2d::Vec2 symmetry(float a, float b, const cocos2d::Vec2 &point);
 
 	CREATE_FUNC(MainScene);
 };
