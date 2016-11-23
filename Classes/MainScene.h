@@ -3,6 +3,8 @@
 
 #include "cocos2d.h"
 
+#include "CustomDrawNode.h"
+
 #include <vector>
 
 class MainScene : public cocos2d::Layer {
@@ -18,7 +20,7 @@ public:
 	virtual bool init();
 
 	cocos2d::Vec2 symmetry(float a, float b, const cocos2d::Vec2 &point);
-    std::vector<cocos2d::Vec2> clipLine(const cocos2d::Vec2 &p1, const cocos2d::Vec2 &p2, cocos2d::Vec2 *vertices, int vlen);
+	std::vector<cocos2d::Vec2> clipLine(const cocos2d::Vec2 &p1, const cocos2d::Vec2 &p2, std::vector<cocos2d::Vec2> vertices);
     void findIntersection(const cocos2d::Vec2 &p1, const cocos2d::Vec2 &p2, const cocos2d::Vec2 &p3, const cocos2d::Vec2 &p4, bool &lineIntersect, bool &segmentIntersect, cocos2d::Vec2 &intersection, cocos2d::Vec2 &closeP1, cocos2d::Vec2 &closeP2);
 
 	CREATE_FUNC(MainScene);
