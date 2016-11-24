@@ -1,7 +1,7 @@
 #ifndef _CUSTOM_DRAW_NODE_H_
 #define _CUSTOM_DRAW_NODE_H_
 
-#include "cocos2d/cocos/2d/CCDrawNode.h"
+#include "cocos2d.h"
 #include <vector>
 
 class CustomDrawNode : public cocos2d::DrawNode

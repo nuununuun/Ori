@@ -34,24 +34,45 @@ bool MainScene::init()
 	float a = tan((cut[2] - cut[1]).getAngle());
 	float b = -a * cut[1].x + cut[1].y;
 
-	v.clear();
+    vector<Vec2> ov;
 
-	v.push_back(Vec2(-size / 2, -size / 2));
-	v.push_back(cut[1]);
-	v.push_back(cut[2]);
-	v.push_back(Vec2(size / 2, size / 2));
-	v.push_back(Vec2(-size / 2, size / 2));
+	ov.push_back(Vec2(-size / 2, -size / 2));
+    ov.push_back(Vec2(size / 2, size / 2));
+    ov.push_back(Vec2(-size / 2, size / 2));
+    ov.push_back(cut[1]);
+    ov.push_back(cut[2]);
+    
+    std::sort(ov.begin(), ov.end(), [&](const Vec2 &a, const Vec2 &b)->bool{
+        return atan2(0 - a.y, 0 - a.x) > atan2(0 - b.y, 0 - b.x);
+    });
 
 	draw = CustomDrawNode::create();
 	draw->setPosition(center);
     
-    draw->drawPolygon(v, Color4B(255, 60, 40, 255), 0.4, Color4B(150, 40, 18, 255));
+    draw->drawPolygon(ov, Color4B(255, 60, 40, 255), 0.4, Color4B(150, 40, 18, 255));
     //draw->drawPoint(touchPoint, 12, Color4F(0, 0, 1, 1));
     //draw->drawPoint(endPoint, 12, Color4F(0, 1, 0, 1));
 
 	addChild(draw);
 
 	////////////////
+    
+    ov.clear();
+    
+    ov.push_back(cut[1]);
+    ov.push_back(cut[2]);
+    ov.push_back(symmetry(a, b, Vec2(size / 2, -size / 2)));
+    
+    std::sort(ov.begin(), ov.end(), [&](const Vec2 &a, const Vec2 &b)->bool{
+        return atan2(0 - a.y, 0 - a.x) > atan2(0 - b.y, 0 - b.x);
+    });
+    
+    draw = CustomDrawNode::create();
+    draw->setPosition(center);
+    
+    draw->drawPolygon(ov, Color4B(255, 30, 20, 255), 0.4, Color4B(150, 40, 18, 255));
+    
+    addChild(draw);
 
 	return true;
 }
