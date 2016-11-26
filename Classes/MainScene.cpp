@@ -14,7 +14,7 @@ bool MainScene::init()
 	int size = 200;
     
     Vec2 touchPoint = Vec2(size / 2 - 50, -size / 2);
-    Vec2 endPoint = Vec2(size / 2 - 120, -size / 2 + 60);
+    Vec2 endPoint = Vec2(size / 2 - 70, -size / 2 + 90);
     
     /// 법선
     Vec2 norm = (endPoint - touchPoint).getPerp();
@@ -25,52 +25,70 @@ bool MainScene::init()
 
 	////////////////
 
+    //-- 기본 사각형 버텍스 --//
 	v.push_back(Vec2(-size / 2, -size / 2));
 	v.push_back(Vec2(size / 2, -size / 2));
 	v.push_back(Vec2(size / 2, size / 2));
 	v.push_back(Vec2(-size / 2, size / 2));
 
+    //-- 터치 시작점과 끝점을 입력받아 폴리곤을 자름 --//
 	auto cut = clipLine(-norm * 320 + (touchPoint + endPoint) / 2, norm * 320 + (touchPoint + endPoint) / 2, v);
 	float a = tan((cut[2] - cut[1]).getAngle());
 	float b = -a * cut[1].x + cut[1].y;
-
-    vector<Vec2> ov;
-
-	ov.push_back(Vec2(-size / 2, -size / 2));
-    ov.push_back(Vec2(size / 2, size / 2));
-    ov.push_back(Vec2(-size / 2, size / 2));
-    ov.push_back(cut[1]);
-    ov.push_back(cut[2]);
     
-    std::sort(ov.begin(), ov.end(), [&](const Vec2 &a, const Vec2 &b)->bool{
+    //-- 잘린 두 폴리곤을 만듦 --// // poly0 = 고정 폴리곤, poly1 = 비고정 폴리곤
+    vector<Vec2> poly[2];
+    Vec2 cp = (cut[1] + cut[2]) / 2;
+    
+    float n = norm.getAngle();
+    n = n >= 0 ? n : 3.141592 + n;
+    
+    for (const auto &i : v) {
+        
+        float angle = round(CC_RADIANS_TO_DEGREES(atan2(i.y - cp.y, i.x - cp.x) - n));
+        angle = angle > 180 ? -360 + angle : angle < -180 ? 360 + angle : angle;
+        
+        if (angle >= 0 || angle < -180)
+            poly[0].push_back(i);
+        else
+            poly[1].push_back(i);
+    }
+    
+    poly[0].push_back(cut[1]);
+    poly[0].push_back(cut[2]);
+    
+    std::sort(poly[0].begin(), poly[0].end(), [&](const Vec2 &a, const Vec2 &b)->bool {
         return atan2(0 - a.y, 0 - a.x) > atan2(0 - b.y, 0 - b.x);
     });
 
 	draw = CustomDrawNode::create();
 	draw->setPosition(center);
     
-    draw->drawPolygon(ov, Color4B(255, 60, 40, 255), 0.4, Color4B(150, 40, 18, 255));
-    //draw->drawPoint(touchPoint, 12, Color4F(0, 0, 1, 1));
-    //draw->drawPoint(endPoint, 12, Color4F(0, 1, 0, 1));
+    draw->drawPolygon(poly[0], Color4B(255, 30, 20, 255), 0.4, Color4B(80, 80, 80, 255));
 
 	addChild(draw);
 
 	////////////////
     
-    ov.clear();
+    for (int i = 0; i < poly[1].size(); i++) {
+        Vec2 sym = symmetry(a, b, poly[1][i]);
+        poly[1][i] = Vec2(round(sym.x), round(sym.y));
+    }
     
-    ov.push_back(cut[1]);
-    ov.push_back(cut[2]);
-    ov.push_back(symmetry(a, b, Vec2(size / 2, -size / 2)));
+    poly[1].push_back(cut[1]);
+    poly[1].push_back(cut[2]);
     
-    std::sort(ov.begin(), ov.end(), [&](const Vec2 &a, const Vec2 &b)->bool{
+    
+    std::sort(poly[1].begin(), poly[1].end(), [&](const Vec2 &a, const Vec2 &b)->bool{
         return atan2(0 - a.y, 0 - a.x) > atan2(0 - b.y, 0 - b.x);
     });
     
     draw = CustomDrawNode::create();
     draw->setPosition(center);
     
-    draw->drawPolygon(ov, Color4B(255, 30, 20, 255), 0.4, Color4B(150, 40, 18, 255));
+    draw->drawPolygon(poly[1], Color4B(255, 80, 60, 255), 0.4, Color4B(80, 80, 80, 255));
+    draw->drawPoint(touchPoint, 9, Color4F::BLACK);
+    draw->drawPoint(endPoint, 9, Color4F::BLACK);
     
     addChild(draw);
 
