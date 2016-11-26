@@ -20,12 +20,15 @@ bool MainScene::init()
     v.push_back(Vec2(size / 2, size / 2));
     v.push_back(Vec2(-size / 2, size / 2));
     
-    paper = CustomDrawNode::create();
-    paper->setPosition(center);
+    paper = CustomPolygon::create(v);
     
-    paper->drawPolygon(v, Color4B(255, 30, 20, 255), 0.4, Color4B(80, 80, 80, 255));
+    paper->drawPolygon(Color4B(255, 30, 20, 255), Color4B(80, 80, 80, 255));
     
     addChild(paper);
+    
+    other = CustomPolygon::create();
+    
+    addChild(other);
     
     auto listener = EventListenerTouchAllAtOnce::create();
     listener->onTouchesBegan = CC_CALLBACK_2(MainScene::onTouchesBegan, this);
@@ -45,8 +48,11 @@ bool MainScene::init()
     endDraw->drawPoint(Vec2::ZERO, 12, Color4F::BLUE);
     addChild(endDraw);
     
-//    foldPaper(draw, v, touchPoint, endPoint);
-    
+    test = Label::createWithSystemFont("0", "", 20);
+    test->setTextColor(Color4B::BLACK);
+    test->setAnchorPoint((Vec2(0, 1)));
+    test->setPosition(10, center.y * 2 - 10);
+    addChild(test);
     
 	return true;
 }
@@ -63,6 +69,15 @@ void MainScene::onTouchesMoved(const vector<Touch*> &t, cocos2d::Event *e) {
     endPoint = t[0]->getLocation();
     
     endDraw->setPosition(endPoint);
+    
+    Vec2 center = Director::getInstance()->getVisibleSize() / 2;
+    
+    Vec2 a = startPoint - center;
+    Vec2 b = endPoint - center;
+    
+    if (startPoint.fuzzyEquals(endPoint, 1)) return;
+    
+    foldPaperPreview(paper, other, a, b);
 
 }
 
@@ -73,37 +88,27 @@ void MainScene::onTouchesEnded(const vector<Touch*> &t, cocos2d::Event *e) {
     endDraw->setPosition(endPoint);
     
     Vec2 center = Director::getInstance()->getVisibleSize() / 2;
-    int size = 200;
-    
-    vector<Vec2> v;
-    v.push_back(Vec2(-size / 2, -size / 2));
-    v.push_back(Vec2(size / 2, -size / 2));
-    v.push_back(Vec2(size / 2, size / 2));
-    v.push_back(Vec2(-size / 2, size / 2));
     
     Vec2 a = startPoint - center;
     Vec2 b = endPoint - center;
     
-    foldPaper(paper, v, a, b);
+    if (startPoint.fuzzyEquals(endPoint, 1)) return;
+    
+    foldPaperPreview(paper, other, a, b);
     
 }
 
-void MainScene::foldPaper(CustomDrawNode *original, vector<Vec2> vertices, const Vec2 &start, const Vec2 &end) {
+void MainScene::foldPaper(CustomPolygon *original, CustomPolygon *splitted, const Vec2 &start, const Vec2 &end) {
     
     Vec2 center = Director::getInstance()->getVisibleSize() / 2;
     
     /// 법선
     Vec2 normalVector = (end - start).getPerp();
     
-    auto *folded = CustomDrawNode::create();
-    folded->setPosition(center);
-    
-    addChild(folded);
-    
     ////////////////
     
     //-- 터치 시작점과 끝점을 입력받아 폴리곤을 자름 --//
-    auto cut = clipLine(-normalVector * 320 + (start + end) / 2, normalVector * 320 + (start + end) / 2, vertices);
+    auto cut = clipLine(-normalVector * 600 + (start + end) / 2, normalVector * 600 + (start + end) / 2, original->vertices);
     float a = tan((cut[2] - cut[1]).getAngle());
     float b = -a * cut[1].x + cut[1].y;
     
@@ -120,7 +125,9 @@ void MainScene::foldPaper(CustomDrawNode *original, vector<Vec2> vertices, const
         i2 = 0;
     }
     
-    for (const auto &i : vertices) {
+    float testAngle[4];
+    int cnt = 0;
+    for (const auto &i : original->vertices) {
         
         float angle = round(CC_RADIANS_TO_DEGREES(atan2(i.y - cp.y, i.x - cp.x) - n));
         angle = angle > 180 ? -360 + angle : angle < -180 ? 360 + angle : angle;
@@ -129,17 +136,22 @@ void MainScene::foldPaper(CustomDrawNode *original, vector<Vec2> vertices, const
             poly[i1].push_back(i);
         else
             poly[i2].push_back(i);
+        
+        testAngle[cnt++] = angle;
     }
+    
+    test->setString("0: " + std::to_string(testAngle[0]) + ", 1: " + std::to_string(testAngle[1]) + "\n2: " + std::to_string(testAngle[2]) + ", 3: " + std::to_string(testAngle[3]));
     
     poly[0].push_back(cut[1]);
     poly[0].push_back(cut[2]);
     
     std::sort(poly[0].begin(), poly[0].end(), [&](const Vec2 &a, const Vec2 &b)->bool {
-        return atan2(0 - a.y, 0 - a.x) > atan2(0 - b.y, 0 - b.x);
+        return atan2(cp.y - a.y, cp.x - a.x) > atan2(cp.y - b.y, cp.x - b.x);
     });
     
-    original->clear();
-    original->drawPolygon(poly[0], Color4B(255, 30, 20, 255), 0.4, Color4B(80, 80, 80, 255));
+    original->vertices.clear();
+    for (auto i : poly[0]) original->vertices.push_back(i);
+    original->drawPolygon(Color4B(250, 32, 24, 255), Color4B(80, 80, 80, 255));
     
     
     ////////////////
@@ -154,11 +166,91 @@ void MainScene::foldPaper(CustomDrawNode *original, vector<Vec2> vertices, const
     
     
     std::sort(poly[1].begin(), poly[1].end(), [&](const Vec2 &a, const Vec2 &b)->bool{
-        return atan2(0 - a.y, 0 - a.x) > atan2(0 - b.y, 0 - b.x);
+        return atan2(cp.y - a.y, cp.x - a.x) > atan2(cp.y - b.y, cp.x - b.x);
     });
     
-    folded->drawPolygon(poly[1], Color4B(255, 80, 60, 255), 0.4, Color4B(80, 80, 80, 255));
+    splitted->vertices.clear();
+    for (auto i : poly[1]) splitted->vertices.push_back(i);
+    splitted->drawPolygon(Color4B(255, 90, 72, 255), Color4B(80, 80, 80, 255));
 }
+
+void MainScene::foldPaperPreview(CustomPolygon *original, CustomPolygon *splitted, const Vec2 &start, const Vec2 &end) {
+    
+    Vec2 center = Director::getInstance()->getVisibleSize() / 2;
+    
+    /// 법선
+    Vec2 normalVector = (end - start).getPerp();
+    
+    ////////////////
+    
+    //-- 터치 시작점과 끝점을 입력받아 폴리곤을 자름 --//
+    auto cut = clipLine(-normalVector * 600 + (start + end) / 2, normalVector * 600 + (start + end) / 2, original->previewVertices);
+    float a = tan((cut[2] - cut[1]).getAngle());
+    float b = -a * cut[1].x + cut[1].y;
+    
+    //-- 잘린 두 폴리곤을 만듦 --// // poly0 = 고정 폴리곤, poly1 = 비고정 폴리곤
+    vector<Vec2> poly[2];
+    Vec2 cp = (cut[1] + cut[2]) / 2;
+    
+    float n = normalVector.getAngle();
+    n = n >= 0 ? n : 3.141592 + n;
+    
+    int i1 = 0, i2 = 1;
+    if (end.x > start.x) {
+        i1 = 1;
+        i2 = 0;
+    }
+    
+    float testAngle[4];
+    int cnt = 0;
+    for (const auto &i : original->previewVertices) {
+        
+        float angle = round(CC_RADIANS_TO_DEGREES(atan2(i.y - cp.y, i.x - cp.x) - n));
+        angle = angle > 180 ? -360 + angle : angle < -180 ? 360 + angle : angle;
+        
+        if (angle >= 0 || angle < -180)
+            poly[i1].push_back(i);
+        else
+            poly[i2].push_back(i);
+        
+        testAngle[cnt++] = angle;
+    }
+    
+    test->setString("0: " + std::to_string(testAngle[0]) + ", 1: " + std::to_string(testAngle[1]) + "\n2: " + std::to_string(testAngle[2]) + ", 3: " + std::to_string(testAngle[3]));
+    
+    poly[0].push_back(cut[1]);
+    poly[0].push_back(cut[2]);
+    
+    std::sort(poly[0].begin(), poly[0].end(), [&](const Vec2 &a, const Vec2 &b)->bool {
+        return atan2(cp.y - a.y, cp.x - a.x) > atan2(cp.y - b.y, cp.x - b.x);
+    });
+    
+//    original->vertices.clear();
+//    for (auto i : poly[0]) original->vertices.push_back(i);
+    original->vertices = poly[0];
+    original->drawPolygon(Color4B(250, 32, 24, 255), Color4B(80, 80, 80, 255));
+    
+    
+    ////////////////
+    
+    for (int i = 0; i < poly[1].size(); i++) {
+        Vec2 sym = symmetry(a, b, poly[1][i]);
+        poly[1][i] = Vec2(round(sym.x), round(sym.y));
+    }
+    
+    poly[1].push_back(cut[1]);
+    poly[1].push_back(cut[2]);
+    
+    
+    std::sort(poly[1].begin(), poly[1].end(), [&](const Vec2 &a, const Vec2 &b)->bool{
+        return atan2(cp.y - a.y, cp.x - a.x) > atan2(cp.y - b.y, cp.x - b.x);
+    });
+    
+    splitted->vertices.clear();
+    for (auto i : poly[1]) splitted->vertices.push_back(i);
+    splitted->drawPolygon(Color4B(255, 90, 72, 255), Color4B(80, 80, 80, 255));
+}
+
 
 Vec2 MainScene::symmetry(float a, float b, const Vec2 & point)
 {

@@ -3,7 +3,7 @@
 
 #include "cocos2d.h"
 
-#include "CustomDrawNode.h"
+#include "CustomPolygon.h"
 
 #include <vector>
 
@@ -23,7 +23,8 @@ public:
 	std::vector<cocos2d::Vec2> clipLine(const cocos2d::Vec2 &p1, const cocos2d::Vec2 &p2, std::vector<cocos2d::Vec2> vertices);
     void findIntersection(const cocos2d::Vec2 &p1, const cocos2d::Vec2 &p2, const cocos2d::Vec2 &p3, const cocos2d::Vec2 &p4, bool &lineIntersect, bool &segmentIntersect, cocos2d::Vec2 &intersection, cocos2d::Vec2 &closeP1, cocos2d::Vec2 &closeP2);
     
-    void foldPaper(CustomDrawNode *original, std::vector<cocos2d::Vec2> vertices, const cocos2d::Vec2 &start, const cocos2d::Vec2 &end);
+    void foldPaper(CustomPolygon *original, CustomPolygon *splitted, const cocos2d::Vec2 &start, const cocos2d::Vec2 &end);
+    void foldPaperPreview(CustomPolygon *original, CustomPolygon *splitted, const cocos2d::Vec2 &start, const cocos2d::Vec2 &end);
     
     void onTouchesBegan(const std::vector<cocos2d::Touch*> &t, cocos2d::Event *e);
     void onTouchesMoved(const std::vector<cocos2d::Touch*> &t, cocos2d::Event *e);
@@ -31,7 +32,10 @@ public:
     
     cocos2d::Vec2 startPoint, endPoint;
     
-    CustomDrawNode *startDraw, *endDraw, *paper;
+    CustomDrawNode *startDraw, *endDraw;
+    CustomPolygon *paper, *other;
+    
+    cocos2d::Label *test;
     
 	CREATE_FUNC(MainScene);
 };
