@@ -18,11 +18,20 @@ public:
     static CustomPolygon *create();
     static CustomPolygon *create(const std::vector<cocos2d::Vec2> &vertices);
     
-    void drawPolygon(const cocos2d::Color4B &fill, const cocos2d::Color4B &border);
+    void drawPolygon();
+    void drawPolygonPreview();
+    
+    void setVertices(const std::vector<cocos2d::Vec2> &vertices);
+    void sortVertices(const cocos2d::Vec2 &center);
     
     std::vector<cocos2d::Vec2> vertices;
+    std::vector<std::pair<cocos2d::Vec2, cocos2d::Vec2>> edges;
     std::vector<cocos2d::Vec2> previewVertices;
     CustomDrawNode *polygon;
+    
+    bool head = true;
+    
+private:
 };
 
 #endif /* CustomPolygon_h */

@@ -20,14 +20,15 @@ bool MainScene::init()
     v.push_back(Vec2(size / 2, size / 2));
     v.push_back(Vec2(-size / 2, size / 2));
     
-    paper = CustomPolygon::create(v);
+    auto paper = CustomPolygon::create(v);
     
-    paper->drawPolygon(Color4B(255, 30, 20, 255), Color4B(80, 80, 80, 255));
+    paper->head = true;
+    paper->drawPolygon();
     
     addChild(paper);
     
-    other = CustomPolygon::create();
-    
+    auto other = CustomPolygon::create();
+    other->head = false;
     addChild(other);
     
     auto listener = EventListenerTouchAllAtOnce::create();
@@ -54,6 +55,9 @@ bool MainScene::init()
     test->setPosition(10, center.y * 2 - 10);
     addChild(test);
     
+    papers.push_back(paper);
+    papers.push_back(other);
+    
 	return true;
 }
 
@@ -77,7 +81,9 @@ void MainScene::onTouchesMoved(const vector<Touch*> &t, cocos2d::Event *e) {
     
     if (startPoint.fuzzyEquals(endPoint, 1)) return;
     
-    foldPaperPreview(paper, other, a, b);
+//    papers[0]
+    
+    foldPaperPreview(papers[0], papers[1], a, b);
 
 }
 
@@ -94,7 +100,7 @@ void MainScene::onTouchesEnded(const vector<Touch*> &t, cocos2d::Event *e) {
     
     if (startPoint.fuzzyEquals(endPoint, 1)) return;
     
-    foldPaperPreview(paper, other, a, b);
+    foldPaperPreview(papers[0], papers[1], a, b);
     
 }
 
@@ -145,13 +151,12 @@ void MainScene::foldPaper(CustomPolygon *original, CustomPolygon *splitted, cons
     poly[0].push_back(cut[1]);
     poly[0].push_back(cut[2]);
     
-    std::sort(poly[0].begin(), poly[0].end(), [&](const Vec2 &a, const Vec2 &b)->bool {
-        return atan2(cp.y - a.y, cp.x - a.x) > atan2(cp.y - b.y, cp.x - b.x);
-    });
+    original->setVertices(poly[0]);
+    original->sortVertices(cp);
     
     original->vertices.clear();
     for (auto i : poly[0]) original->vertices.push_back(i);
-    original->drawPolygon(Color4B(250, 32, 24, 255), Color4B(80, 80, 80, 255));
+    original->drawPolygon();
     
     
     ////////////////
@@ -164,14 +169,12 @@ void MainScene::foldPaper(CustomPolygon *original, CustomPolygon *splitted, cons
     poly[1].push_back(cut[1]);
     poly[1].push_back(cut[2]);
     
-    
-    std::sort(poly[1].begin(), poly[1].end(), [&](const Vec2 &a, const Vec2 &b)->bool{
-        return atan2(cp.y - a.y, cp.x - a.x) > atan2(cp.y - b.y, cp.x - b.x);
-    });
+    splitted->setVertices(poly[1]);
+    splitted->sortVertices(cp);
     
     splitted->vertices.clear();
     for (auto i : poly[1]) splitted->vertices.push_back(i);
-    splitted->drawPolygon(Color4B(255, 90, 72, 255), Color4B(80, 80, 80, 255));
+    splitted->drawPolygon();
 }
 
 void MainScene::foldPaperPreview(CustomPolygon *original, CustomPolygon *splitted, const Vec2 &start, const Vec2 &end) {
@@ -228,7 +231,7 @@ void MainScene::foldPaperPreview(CustomPolygon *original, CustomPolygon *splitte
 //    original->vertices.clear();
 //    for (auto i : poly[0]) original->vertices.push_back(i);
     original->vertices = poly[0];
-    original->drawPolygon(Color4B(250, 32, 24, 255), Color4B(80, 80, 80, 255));
+    original->drawPolygon();
     
     
     ////////////////
@@ -248,7 +251,7 @@ void MainScene::foldPaperPreview(CustomPolygon *original, CustomPolygon *splitte
     
     splitted->vertices.clear();
     for (auto i : poly[1]) splitted->vertices.push_back(i);
-    splitted->drawPolygon(Color4B(255, 90, 72, 255), Color4B(80, 80, 80, 255));
+    splitted->drawPolygon();
 }
 
 

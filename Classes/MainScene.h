@@ -33,9 +33,10 @@ public:
     cocos2d::Vec2 startPoint, endPoint;
     
     CustomDrawNode *startDraw, *endDraw;
-    CustomPolygon *paper, *other;
     
     cocos2d::Label *test;
+    
+    std::vector<CustomPolygon*> papers;
     
 	CREATE_FUNC(MainScene);
 };
