@@ -23,6 +23,7 @@ public:
     
     void setVertices(const std::vector<cocos2d::Vec2> &vertices);
     void sortVertices(const cocos2d::Vec2 &center);
+    void calculateEdges();
     
     std::vector<cocos2d::Vec2> vertices;
     std::vector<std::pair<cocos2d::Vec2, cocos2d::Vec2>> edges;
@@ -31,7 +32,6 @@ public:
     
     bool head = true;
     
-private:
 };
 
 #endif /* CustomPolygon_h */

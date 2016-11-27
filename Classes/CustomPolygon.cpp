@@ -60,9 +60,18 @@ void CustomPolygon::setVertices(const vector<cocos2d::Vec2> &v)
 }
 
 void CustomPolygon::sortVertices(const Vec2 &center) {
-    std::sort(vertices.begin(), vertices.end(), [&](const Vec2 &a, const Vec2 &b)->bool {
+    std::sort(vertices.begin(), vertices.end(), [&](const Vec2 &a, const Vec2 &b)->bool {   
         return atan2(center.y - a.y, center.x - a.x) > atan2(center.y - b.y, center.x - b.x);
     });
+}
+
+void CustomPolygon::calculateEdges() {
+    for (int i = 0; i < vertices.size() - 1; i++) {
+        edges.push_back(make_pair(vertices[i], vertices[i + 1]));
+    }
+    
+    edges.push_back(make_pair(vertices.back(), vertices.front()));
+    
 }
 
 void CustomPolygon::drawPolygon() {

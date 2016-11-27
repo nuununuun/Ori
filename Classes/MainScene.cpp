@@ -23,6 +23,7 @@ bool MainScene::init()
     auto paper = CustomPolygon::create(v);
     
     paper->head = true;
+    paper->calculateEdges();
     paper->drawPolygon();
     
     addChild(paper);
@@ -80,8 +81,6 @@ void MainScene::onTouchesMoved(const vector<Touch*> &t, cocos2d::Event *e) {
     Vec2 b = endPoint - center;
     
     if (startPoint.fuzzyEquals(endPoint, 1)) return;
-    
-//    papers[0]
     
     foldPaperPreview(papers[0], papers[1], a, b);
 
@@ -153,9 +152,8 @@ void MainScene::foldPaper(CustomPolygon *original, CustomPolygon *splitted, cons
     
     original->setVertices(poly[0]);
     original->sortVertices(cp);
+    original->calculateEdges();
     
-    original->vertices.clear();
-    for (auto i : poly[0]) original->vertices.push_back(i);
     original->drawPolygon();
     
     
@@ -171,9 +169,8 @@ void MainScene::foldPaper(CustomPolygon *original, CustomPolygon *splitted, cons
     
     splitted->setVertices(poly[1]);
     splitted->sortVertices(cp);
+    splitted->calculateEdges();
     
-    splitted->vertices.clear();
-    for (auto i : poly[1]) splitted->vertices.push_back(i);
     splitted->drawPolygon();
 }
 
@@ -228,9 +225,8 @@ void MainScene::foldPaperPreview(CustomPolygon *original, CustomPolygon *splitte
         return atan2(cp.y - a.y, cp.x - a.x) > atan2(cp.y - b.y, cp.x - b.x);
     });
     
-//    original->vertices.clear();
-//    for (auto i : poly[0]) original->vertices.push_back(i);
-    original->vertices = poly[0];
+    original->setVertices(poly[0]);
+    original->sortVertices(cp);
     original->drawPolygon();
     
     
@@ -244,13 +240,9 @@ void MainScene::foldPaperPreview(CustomPolygon *original, CustomPolygon *splitte
     poly[1].push_back(cut[1]);
     poly[1].push_back(cut[2]);
     
+    splitted->setVertices(poly[1]);
+    splitted->sortVertices(cp);
     
-    std::sort(poly[1].begin(), poly[1].end(), [&](const Vec2 &a, const Vec2 &b)->bool{
-        return atan2(cp.y - a.y, cp.x - a.x) > atan2(cp.y - b.y, cp.x - b.x);
-    });
-    
-    splitted->vertices.clear();
-    for (auto i : poly[1]) splitted->vertices.push_back(i);
     splitted->drawPolygon();
 }
 
