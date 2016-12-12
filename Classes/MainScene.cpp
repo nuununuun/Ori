@@ -125,7 +125,7 @@ void MainScene::foldPaper(CustomPolygon *original, CustomPolygon *splitted, cons
     n = n >= 0 ? n : 3.141592 + n;
     
     int i1 = 0, i2 = 1;
-    if (end.x > start.x) {
+    if (end.x >= start.x) {
         i1 = 1;
         i2 = 0;
     }

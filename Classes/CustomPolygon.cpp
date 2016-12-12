@@ -54,7 +54,7 @@ CustomPolygon *CustomPolygon::create(const vector<cocos2d::Vec2> &v) {
     return ret;
 }
 
-void CustomPolygon::setVertices(const vector<cocos2d::Vec2> &v)
+void CustomPolygon::setVertices(const vector<Vec2> &v)
 {
     vertices = v;
 }
@@ -72,6 +72,13 @@ void CustomPolygon::calculateEdges() {
     
     edges.push_back(make_pair(vertices.back(), vertices.front()));
     
+}
+
+array<CustomPolygon *, 2> CustomPolygon::cutPolygon(const Vec2 & v1, const Vec2 & v2)
+{
+	auto ret = array<CustomPolygon *, 2>();
+
+	return ret;
 }
 
 void CustomPolygon::drawPolygon() {

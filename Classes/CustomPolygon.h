@@ -12,6 +12,7 @@
 #include "cocos2d.h"
 #include "CustomDrawNode.h"
 #include <vector>
+#include <array>
 
 class CustomPolygon : public cocos2d::Node {
 public:
@@ -24,6 +25,8 @@ public:
     void setVertices(const std::vector<cocos2d::Vec2> &vertices);
     void sortVertices(const cocos2d::Vec2 &center);
     void calculateEdges();
+
+	std::array<CustomPolygon *, 2> cutPolygon(const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v2);
     
     std::vector<cocos2d::Vec2> vertices;
     std::vector<std::pair<cocos2d::Vec2, cocos2d::Vec2>> edges;
