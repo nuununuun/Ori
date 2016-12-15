@@ -32,7 +32,7 @@ public:
     
     cocos2d::Vec2 startPoint, endPoint;
     
-    CustomDrawNode *startDraw, *endDraw;
+    CustomDrawNode *startDraw, *endDraw, *testLine;
     
     cocos2d::Label *test;
     

@@ -12,9 +12,29 @@
 #include "cocos2d.h"
 #include "CustomDrawNode.h"
 #include <vector>
+#include <list>
 #include <array>
 
 class CustomPolygon : public cocos2d::Node {
+private:
+	struct Edge {
+		Edge(const cocos2d::Vec2 &start, int side) :
+			start(start),
+			startSide(side),
+			next(nullptr),
+			prev(nullptr),
+			dist(0.0f),
+			visited(false) {
+		}
+
+		cocos2d::Vec2 start;
+		int startSide;
+		Edge *next;
+		Edge *prev;
+		float dist;
+		bool visited;
+	};
+
 public:
     static CustomPolygon *create();
     static CustomPolygon *create(const std::vector<cocos2d::Vec2> &vertices);
@@ -26,14 +46,27 @@ public:
     void sortVertices(const cocos2d::Vec2 &center);
     void calculateEdges();
 
+	void symmetry();
+
 	std::array<CustomPolygon *, 2> cutPolygon(const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v2);
     
     std::vector<cocos2d::Vec2> vertices;
-    std::vector<std::pair<cocos2d::Vec2, cocos2d::Vec2>> edges;
+    std::vector<Edge> edges;
     std::vector<cocos2d::Vec2> previewVertices;
     CustomDrawNode *polygon;
     
     bool head = true;
+
+private:
+	int checkEdgeSide(const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v2, const cocos2d::Vec2 &p);
+	float calcSignedDistance(const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v2, const cocos2d::Vec2 &p);
+
+	cocos2d::Vec2 getSymmetricPoint(float a, float b, const cocos2d::Vec2 &p);
+
+	std::list<Edge> splittedEdges;
+	std::vector<Edge*> edgesOnLine;
+
+	cocos2d::Vec2 cutStart, cutEnd;
     
 };
 
