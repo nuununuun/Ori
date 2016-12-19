@@ -43,8 +43,9 @@ public:
     void drawPolygonPreview();
     
     void setVertices(const std::vector<cocos2d::Vec2> &vertices);
-    void sortVertices(const cocos2d::Vec2 &center);
     void calculateEdges();
+
+	void drawPreview();
 
 	void symmetry();
 
@@ -64,7 +65,9 @@ private:
 	cocos2d::Vec2 getSymmetricPoint(float a, float b, const cocos2d::Vec2 &p);
 
 	std::list<Edge> splittedEdges;
-	std::vector<Edge*> edgesOnLine;
+	std::vector<Edge*> edgesOnLine; 
+	std::array<CustomPolygon *, 2> previewData;
+	bool isHaveSecondData = false;
 
 	cocos2d::Vec2 cutStart, cutEnd;
     

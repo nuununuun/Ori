@@ -44,8 +44,13 @@ CustomPolygon *CustomPolygon::create(const vector<cocos2d::Vec2> &v) {
         
         ret->addChild(ret->polygon);
         
-        ret->vertices = v;
-        ret->previewVertices = v;
+		ret->setVertices(v);
+
+		for (int i = 0; i < 2; i++) {
+			ret->previewData[i] = CustomPolygon::create();
+			ret->previewData[i]->setVisible(false);
+			ret->addChild(ret->previewData[i]);
+		}
     }
     else
     {
@@ -57,12 +62,7 @@ CustomPolygon *CustomPolygon::create(const vector<cocos2d::Vec2> &v) {
 void CustomPolygon::setVertices(const vector<Vec2> &v)
 {
     vertices = v;
-}
-
-void CustomPolygon::sortVertices(const Vec2 &center) {
-    std::sort(vertices.begin(), vertices.end(), [&](const Vec2 &a, const Vec2 &b)->bool {   
-        return atan2(center.y - a.y, center.x - a.x) > atan2(center.y - b.y, center.x - b.x);
-    });
+	calculateEdges();
 }
 
 void CustomPolygon::calculateEdges() {
@@ -78,6 +78,23 @@ void CustomPolygon::symmetry() {
 	for (int i = 0; i < vertices.size(); i++) {
 		Vec2 sym = getSymmetricPoint(a, b, vertices[i]);
 		vertices[i] = Vec2(round(sym.x), round(sym.y));
+	}
+}
+
+void CustomPolygon::drawPreview() {
+	polygon->setVisible(false);
+
+	previewData[0]->setVisible(true);
+	previewData[0]->drawPolygon();
+
+
+	if (previewData[1]->vertices.size() > 0) {
+		previewData[1]->setVisible(true);
+		previewData[1]->head = false;
+		previewData[1]->symmetry();
+		previewData[1]->drawPolygon();
+	} else {
+		previewData[1]->polygon->clear();
 	}
 }
 
@@ -101,7 +118,7 @@ array<CustomPolygon *, 2> CustomPolygon::cutPolygon(const Vec2 & v1, const Vec2 
 			edgesOnLine.push_back(&splittedEdges.back());
 		} else if (edgeStartSide != edgeEndSide && edgeEndSide != 0) {
 			auto contact = Vec2::getIntersectPoint(vertices[(i + 1) % vertices.size()], vertices[i], v2, v1);
-			splittedEdges.push_back(Edge(contact, 0));
+			splittedEdges.push_back	(Edge(contact, 0));
 			edgesOnLine.push_back(&splittedEdges.back());
 		}
 	}
@@ -205,6 +222,14 @@ array<CustomPolygon *, 2> CustomPolygon::cutPolygon(const Vec2 & v1, const Vec2 
 		}
 	}
 
+	for (int i = 0; i < 2; i++) {
+		if (ret[i] != nullptr) {
+			previewData[i]->setVertices(ret[i]->vertices);
+			previewData[i]->cutStart = ret[i]->cutStart;
+			previewData[i]->cutEnd = ret[i]->cutEnd;
+		}
+	}
+
 	return ret;
 }
 
@@ -221,9 +246,9 @@ float CustomPolygon::calcSignedDistance(const cocos2d::Vec2 &v1, const cocos2d::
 void CustomPolygon::drawPolygon() {
     polygon->clear();
     if (head)
-        polygon->drawPolygon(vertices, Color4B(250, 32, 24, 255), 0.6, Color4B(80, 80, 80, 255));
+        polygon->drawPolygon(vertices, Color4B(255, 77, 77, 255), 1, Color4B(196, 64, 64, 255));
     else
-        polygon->drawPolygon(vertices, Color4B(255, 90, 72, 255), 0.6, Color4B(80, 80, 80, 255));
+        polygon->drawPolygon(vertices, Color4B(255, 100, 91, 255), 1, Color4B(196, 64, 64, 255));
 }
 
 void CustomPolygon::drawPolygonPreview() {

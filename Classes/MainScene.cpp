@@ -23,14 +23,9 @@ bool MainScene::init()
     auto paper = CustomPolygon::create(v);
     
     paper->head = true;
-    paper->calculateEdges();
     paper->drawPolygon();
     
     addChild(paper);
-    
-    auto other = CustomPolygon::create();
-    other->head = false;
-    addChild(other);
     
     auto listener = EventListenerTouchAllAtOnce::create();
     listener->onTouchesBegan = CC_CALLBACK_2(MainScene::onTouchesBegan, this);
@@ -59,34 +54,12 @@ bool MainScene::init()
     addChild(test);
     
     papers.push_back(paper);
-    papers.push_back(other);
 
 	/// Debug ///
 
-	papers[0]->polygon->setVisible(false);
-
-	startPoint = Vec2(50, -90);
-	startDraw->setPosition(startPoint + center);
-
-	endPoint = Vec2(60, -110);
-	endDraw->setPosition(endPoint + center);
-
-	Vec2 normalVector = (endPoint - startPoint).getPerp();
-
-	auto poly = papers[0]->cutPolygon(-normalVector * 100 + (startPoint + endPoint) / 2, normalVector * 100 + (startPoint + endPoint) / 2);
-	poly[0]->drawPolygon();
-
-	addChild(poly[0]);
-
-	poly[1]->head = false;
-	poly[1]->symmetry();
-	poly[1]->drawPolygon();
-
-	addChild(poly[1]);
-
 	testLine = CustomDrawNode::create();
+	//testLine->setVisible(false);
 	testLine->setPosition(center);
-	testLine->drawLine(-normalVector * 100 + (startPoint + endPoint) / 2, normalVector * 100 + (startPoint + endPoint) / 2, Color4F::BLUE);
 	addChild(testLine);
     
 	return true;
@@ -114,8 +87,10 @@ void MainScene::onTouchesMoved(const vector<Touch*> &t, cocos2d::Event *e) {
 	testLine->clear();
 	testLine->drawLine(-normalVector * 100 + (a + b) / 2, normalVector * 100 + (a + b) / 2, Color4F::BLUE);
 
-//	foldPaper(papers[0], papers[1], a, b);
-
+	for (auto &i : papers) {
+		i->cutPolygon(-normalVector * 100 + (a + b) / 2, normalVector * 100 + (a + b) / 2);
+		i->drawPreview();
+	}
 }
 
 void MainScene::onTouchesEnded(const vector<Touch*> &t, cocos2d::Event *e) {
@@ -135,9 +110,24 @@ void MainScene::onTouchesEnded(const vector<Touch*> &t, cocos2d::Event *e) {
 	testLine->clear();
 	testLine->drawLine(-normalVector * 100 + (a + b) / 2, normalVector * 100 + (a + b) / 2, Color4F::BLUE);
 
+	auto polygon = papers[0]->cutPolygon(-normalVector * 100, normalVector * 100);
+	/*
 
-//    foldPaper(papers[0], papers[1], a, b);
-    
+	vector<CustomPolygon*> temp;
+
+	for (auto &i : papers) {
+		auto polygon = i->cutPolygon(-normalVector * 100 + (startPoint + endPoint) / 2, normalVector * 100 + (startPoint + endPoint) / 2);
+		temp.push_back(polygon[0]);
+		temp.push_back(polygon[1]);
+
+		i->runAction(RemoveSelf::create());
+	}
+
+	papers.clear();
+	for (auto &i : temp) {
+		papers.push_back(i);
+	}
+	*/
 }
 
 void MainScene::foldPaper(CustomPolygon *original, CustomPolygon *splitted, const Vec2 &start, const Vec2 &end) {
@@ -226,7 +216,6 @@ void MainScene::foldPaperPreview(CustomPolygon *original, CustomPolygon *splitte
     });
     
     original->setVertices(poly[0]);
-    original->sortVertices(cp);
     original->drawPolygon();
     
     
@@ -241,7 +230,6 @@ void MainScene::foldPaperPreview(CustomPolygon *original, CustomPolygon *splitte
     poly[1].push_back(cut[2]);
     
     splitted->setVertices(poly[1]);
-    splitted->sortVertices(cp);
     
     splitted->drawPolygon();
 }
