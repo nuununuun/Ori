@@ -1,7 +1,10 @@
 #include "MainScene.h"
 
+#include "clipper.hpp"
+
 USING_NS_CC;
 using namespace std;
+using namespace ClipperLib;
 
 bool MainScene::init()
 {
@@ -34,272 +37,100 @@ bool MainScene::init()
     
     getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
     
-    Vec2 touchPoint = Vec2(size / 2 - 50, -size / 2);
-    Vec2 endPoint = Vec2(size / 2 - 70, -size / 2 + 90);
-    
-    startDraw = CustomDrawNode::create();
-    startDraw->drawPoint(Vec2::ZERO, 12, Color4F::BLACK);
-	startDraw->setGlobalZOrder(200000);
-    addChild(startDraw);
-    
-    endDraw = CustomDrawNode::create();
-    endDraw->drawPoint(Vec2::ZERO, 12, Color4F::BLUE);
-	endDraw->setGlobalZOrder(200000);
-    addChild(endDraw);
-    
     test = Label::createWithSystemFont("0", "", 20);
     test->setTextColor(Color4B::BLACK);
     test->setAnchorPoint((Vec2(0, 1)));
+    test->setName("test");
     test->setPosition(10, center.y * 2 - 10);
     addChild(test);
     
     papers.push_back(paper);
 
 	/// Debug ///
-
-	testLine = CustomDrawNode::create();
-	//testLine->setVisible(false);
-	testLine->setPosition(center);
-	addChild(testLine);
     
 	return true;
 }
 
 void MainScene::onTouchesBegan(const vector<Touch*> &t, cocos2d::Event *e) {
     
-    startPoint = t[0]->getLocation();
-    startDraw->setPosition(startPoint);
+    for (auto &i : t) {
+        startPoint = i->getLocation();
+    }
 }
 
 void MainScene::onTouchesMoved(const vector<Touch*> &t, cocos2d::Event *e) {
 
-    endPoint = t[0]->getLocation();
-    endDraw->setPosition(endPoint);
-    
-    Vec2 center = Director::getInstance()->getVisibleSize() / 2;
-    
-    Vec2 a = startPoint - center;
-    Vec2 b = endPoint - center;
-    
-    if (startPoint.fuzzyEquals(endPoint, 1)) return;
-
-	Vec2 normalVector = (b - a).getPerp();
-	testLine->clear();
-	testLine->drawLine(-normalVector * 100 + (a + b) / 2, normalVector * 100 + (a + b) / 2, Color4F::BLUE);
-
-	for (auto &i : papers) {
-		i->cutPolygon(-normalVector * 100 + (a + b) / 2, normalVector * 100 + (a + b) / 2);
-		i->drawPreview();
-	}
+    for (auto &i : t) {
+        endPoint = i->getLocation();
+        
+        Vec2 center = Director::getInstance()->getVisibleSize() / 2;
+        
+        Vec2 a = startPoint - center;
+        Vec2 b = endPoint - center;
+        
+        if (startPoint.fuzzyEquals(endPoint, 1)) continue;
+            
+        Vec2 normalVector = (a - b).getPerp();
+            
+        auto c = a - b;
+        if (action == -1) {
+            if (c.x > 0 && c.y < 0) action = 0;
+            if (c.x < 0 && c.y < 0) action = 1;
+            if (c.x > 0 && c.y > 0) action = 2;
+            if (c.x < 0 && c.y > 0) action = 3;
+        }
+//        if (action == 0) test->setString("leftup");
+//        else if (action == 1) test->setString("rightup");
+//        else if (action == 2) test->setString("leftdown");
+//        else if (action == 3) test->setString("rightdown");
+            
+        for (auto j : papers) {
+            j->cutPolygonPreview(action, -normalVector * 1000 + (a + b) / 2, normalVector * 1000 + (a + b) / 2, a, b);
+            j->drawPreview();
+        }
+    }
 }
 
 void MainScene::onTouchesEnded(const vector<Touch*> &t, cocos2d::Event *e) {
-    
-    endPoint = t[0]->getLocation();
-    
-    endDraw->setPosition(endPoint);
-    
-    Vec2 center = Director::getInstance()->getVisibleSize() / 2;
-    
-    Vec2 a = startPoint - center;
-    Vec2 b = endPoint - center;
-    
-    if (startPoint.fuzzyEquals(endPoint, 1)) return;
+    for (auto &i : t) {
+        endPoint = i->getLocation();
+        
+//        Vec2 center = Director::getInstance()->getVisibleSize() / 2;
+//        
+//        Vec2 a = startPoint - center;
+//        Vec2 b = endPoint - center;
+//        
+//        if (startPoint.fuzzyEquals(endPoint, 1)) continue;
+//        
+//        
+//        auto c = a - b;
+//        
+//        Vec2 normalVector = c.getPerp();
+//        
+//        vector<CustomPolygon *> splittedPolygons;
+//        
+//        for (auto &j : papers) {
+//            auto cutted = j->cutPolygon(action, -normalVector * 1000 + (a + b) / 2, normalVector * 1000 + (a + b) / 2, a, b);
+//            j->drawPreview();
+//            
+////            for (auto j : cutted) {
+////                splittedPolygons.push_back(j);
+//            //            }
+//            papers.push_back(cutted[0]);
+//            papers.push_back(cutted[1]);
+//        }
+//        
+////        for (auto i : papers) {
+////            i->;
+////        }
+//        
+////        papers.clear();
+////        
+////        for (auto &i : splittedPolygons) {
+////            papers.push_back(i);
+////        }
 
-	Vec2 normalVector = (b - a).getPerp();
-	testLine->clear();
-	testLine->drawLine(-normalVector * 100 + (a + b) / 2, normalVector * 100 + (a + b) / 2, Color4F::BLUE);
-
-	auto polygon = papers[0]->cutPolygon(-normalVector * 100, normalVector * 100);
-	/*
-
-	vector<CustomPolygon*> temp;
-
-	for (auto &i : papers) {
-		auto polygon = i->cutPolygon(-normalVector * 100 + (startPoint + endPoint) / 2, normalVector * 100 + (startPoint + endPoint) / 2);
-		temp.push_back(polygon[0]);
-		temp.push_back(polygon[1]);
-
-		i->runAction(RemoveSelf::create());
-	}
-
-	papers.clear();
-	for (auto &i : temp) {
-		papers.push_back(i);
-	}
-	*/
-}
-
-void MainScene::foldPaper(CustomPolygon *original, CustomPolygon *splitted, const Vec2 &start, const Vec2 &end) {
-    
-    Vec2 center = Director::getInstance()->getVisibleSize() / 2;
-    
-    /// 법선
-    Vec2 normalVector = (end - start).getPerp();
-    
-    ////////////////
-    
-    //-- 터치 시작점과 끝점을 입력받아 폴리곤을 자름 --//
-    auto cut = clipLine(-normalVector * 600 + (start + end) / 2, normalVector * 600 + (start + end) / 2, original->vertices);
-    float a = tan((cut[2] - cut[1]).getAngle());
-    float b = -a * cut[1].x + cut[1].y;
-    
-    //-- 잘린 두 폴리곤을 만듦 --// // poly0 = 고정 폴리곤, poly1 = 비고정 폴리곤
-	auto poly = original->cutPolygon(start, end);
-
-	original->polygon->setVisible(false);
-    ////////////////
-
-	test->setString("0: " + std::to_string(poly[0]->vertices[0].x) + ", 1: " + std::to_string(poly[0]->vertices[0].y) + "\n2: " + std::to_string(poly[0]->vertices[1].x) + ", 3: " + std::to_string(poly[0]->vertices[1].y));
-
-	poly[0]->drawPolygon();
-	poly[1]->head = false;
-	//poly[1]->drawPolygon();
-    
-    //for (int i = 0; i < poly[1].size(); i++) {
-    //    Vec2 sym = symmetry(a, b, poly[1][i]);
-    //    poly[1][i] = Vec2(round(sym.x), round(sym.y));
-    //}
-}
-
-void MainScene::foldPaperPreview(CustomPolygon *original, CustomPolygon *splitted, const Vec2 &start, const Vec2 &end) {
-    
-    Vec2 center = Director::getInstance()->getVisibleSize() / 2;
-    
-    /// 법선
-    Vec2 normalVector = (end - start).getPerp();
-    
-    ////////////////
-    
-    //-- 터치 시작점과 끝점을 입력받아 폴리곤을 자름 --//
-    auto cut = clipLine(-normalVector * 600 + (start + end) / 2, normalVector * 600 + (start + end) / 2, original->previewVertices);
-    float a = tan((cut[2] - cut[1]).getAngle());
-    float b = -a * cut[1].x + cut[1].y;
-
-	auto splittedPolygon = original->cutPolygon(start * -100, end * 100);
-    
-    //-- 잘린 두 폴리곤을 만듦 --// // poly0 = 고정 폴리곤, poly1 = 비고정 폴리곤
-    vector<Vec2> poly[2];
-    Vec2 cp = (cut[1] + cut[2]) / 2;
-    
-    float n = normalVector.getAngle();
-    n = n >= 0 ? n : 3.141592 + n;
-    
-    int i1 = 0, i2 = 1;
-    if (end.x > start.x) {
-        i1 = 1;
-        i2 = 0;
+        
+        action = -1;
     }
-    
-    float testAngle[4];
-    int cnt = 0;
-    for (const auto &i : original->previewVertices) {
-        
-        float angle = round(CC_RADIANS_TO_DEGREES(atan2(i.y - cp.y, i.x - cp.x) - n));
-        angle = angle > 180 ? -360 + angle : angle < -180 ? 360 + angle : angle;
-        
-        if (angle >= 0 || angle < -180)
-            poly[i1].push_back(i);
-        else
-            poly[i2].push_back(i);
-        
-        testAngle[cnt++] = angle;
-    }
-    
-    test->setString("0: " + std::to_string(testAngle[0]) + ", 1: " + std::to_string(testAngle[1]) + "\n2: " + std::to_string(testAngle[2]) + ", 3: " + std::to_string(testAngle[3]));
-    
-    poly[0].push_back(cut[1]);
-    poly[0].push_back(cut[2]);
-    
-    std::sort(poly[0].begin(), poly[0].end(), [&](const Vec2 &a, const Vec2 &b)->bool {
-        return atan2(cp.y - a.y, cp.x - a.x) > atan2(cp.y - b.y, cp.x - b.x);
-    });
-    
-    original->setVertices(poly[0]);
-    original->drawPolygon();
-    
-    
-    ////////////////
-    
-    for (int i = 0; i < poly[1].size(); i++) {
-        Vec2 sym = symmetry(a, b, poly[1][i]);
-        poly[1][i] = Vec2(round(sym.x), round(sym.y));
-    }
-    
-    poly[1].push_back(cut[1]);
-    poly[1].push_back(cut[2]);
-    
-    splitted->setVertices(poly[1]);
-    
-    splitted->drawPolygon();
-}
-
-
-Vec2 MainScene::symmetry(float a, float b, const Vec2 & point)
-{
-	return Vec2((2 * a * point.y - (a * a - 1) * point.x - 2 * a * b) / (a * a + 1), (2 * a * point.x + (a * a - 1) * point.y + 2 * b) / (a * a + 1));
-}
-
-
-vector<Vec2> MainScene::clipLine(const Vec2 &p1, const Vec2 &p2, vector<Vec2> vertices)
-{
-    vector<Vec2> ret;
-    
-    vector<float> tValues;
-    
-    ret.push_back(p1);
-    tValues.push_back(0);
-    
-    for (int i = 0; i < vertices.size(); i++) {
-        int j = (i + 1) % vertices.size();
-        
-        bool lineIntersect, segmentIntersect;
-        Vec2 intersection, closeP1, closeP2;
-        
-        float t1, t2;
-        
-        findIntersection(p1, p2, vertices[i], vertices[j], lineIntersect, segmentIntersect, intersection, closeP1, closeP2);
-        
-        if(segmentIntersect) {
-            ret.push_back(intersection);
-            tValues.push_back(t1);
-        }
-    }
-    
-    ret.push_back(p2);
-    tValues.push_back(1);
-
-	/// tValues사용해서 정렬하기.
-    
-    return ret;
-}
-
-void MainScene::findIntersection(const Vec2 &p1, const Vec2 &p2, const Vec2 &p3, const Vec2 &p4, bool &lineIntersect, bool &segmentIntersect, Vec2 &intersection, Vec2 &closeP1, Vec2 &closeP2)
-{
-    float dx12 = p2.x - p1.x;
-    float dy12 = p2.y - p1.y;
-    float dx34 = p4.x - p3.x;
-    float dy34 = p4.y - p3.y;
-    
-    float denominator = (dy12 * dx34 - dx12 * dy34);
-    
-    float t1 = ((p1.x - p3.x) * dy34 + (p3.y - p1.y) * dx34) / denominator;
-
-    lineIntersect = true;
-    
-    float t2 = ((p3.x - p1.x) * dy12 + (p1.y - p3.y) * dx12) / -denominator;
-    
-    intersection = Vec2(p1.x + dx12 * t1, p1.y + dy12 * t1);
-    
-    segmentIntersect = ((t1 >= 0) && (t1 <= 1) && (t2 >= 0) && (t2 <= 1));
-    
-    if (t1 < 0) t1 = 0;
-    else if (t1 > 1) t1 = 1;
-    
-    if (t2 < 0) t2 = 0;
-    else if (t2 > 1) t2 = 1;
-    
-    closeP1 = Vec2(p1.x + dx12 * t1, p1.y + dy12 * t1);
-    closeP2 = Vec2(p3.x + dx34 * t2, p3.y + dy34 * t2);
-   
 }

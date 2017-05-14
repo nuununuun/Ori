@@ -37,19 +37,21 @@ private:
 
 public:
     static CustomPolygon *create();
-    static CustomPolygon *create(const std::vector<cocos2d::Vec2> &vertices);
+    static CustomPolygon *create(std::vector<cocos2d::Vec2> vertices);
     
     void drawPolygon();
     void drawPolygonPreview();
     
-    void setVertices(const std::vector<cocos2d::Vec2> &vertices);
+    void setVertices(std::vector<cocos2d::Vec2> vertices);
     void calculateEdges();
 
 	void drawPreview();
 
 	void symmetry();
 
-	std::array<CustomPolygon *, 2> cutPolygon(const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v2);
+    std::array<CustomPolygon *, 2> cutPolygon(int action, const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v2, const cocos2d::Vec2 &p1, const cocos2d::Vec2 &p2);
+    void cutPolygonPreview(int action, const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v2, const cocos2d::Vec2 &p1, const cocos2d::Vec2 &p2);
+    void splitPolygon(const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v2, const cocos2d::Vec2 &p1, const cocos2d::Vec2 &p2);
     
     std::vector<cocos2d::Vec2> vertices;
     std::vector<Edge> edges;
