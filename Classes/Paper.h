@@ -18,7 +18,9 @@ public:
     
     bool init(int size);
     
-    void findVertex(const cocos2d::Vec2 &pos);
+	cocos2d::Vec2 * findVertex(const cocos2d::Vec2 &pos, CPolygon **polygon);
+
+	cocos2d::DrawNode *	_debug;
     
 protected:
     std::vector<CPolygon *> _polygons;

@@ -28,7 +28,20 @@ bool MainScene::init() {
 void MainScene::onTouchesBegan(const vector<Touch*> &touches, cocos2d::Event *e) {
     
     for (auto &t : touches) {
-        _paper->findVertex(_paper->convertToNodeSpace(t->getLocation()));
+		_touchId = t->getID();
+
+		_startPoint = _paper->convertToNodeSpace(t->getLocation());
+		_endPoint = _startPoint;
+
+		_paper->_debug->clear();
+		_paper->_debug->drawDot(_startPoint, 4, Color4F::GREEN);
+		_paper->_debug->drawDot(_endPoint, 4, Color4F::BLUE);
+
+
+		auto ret = _paper->findVertex(_startPoint, nullptr);
+		if (ret != nullptr) {
+			_paper->_debug->drawDot(*ret, 8, Color4F::ORANGE);
+		}
     }
     
 }
@@ -36,6 +49,19 @@ void MainScene::onTouchesBegan(const vector<Touch*> &touches, cocos2d::Event *e)
 void MainScene::onTouchesMoved(const vector<Touch*> &touches, cocos2d::Event *e) {
 
     for (auto &t : touches) {
+		if (_touchId == t->getID()) {
+
+			_endPoint = _paper->convertToNodeSpace(t->getLocation());
+
+			_paper->_debug->clear();
+			_paper->_debug->drawDot(_startPoint, 4, Color4F::GREEN);
+			_paper->_debug->drawDot(_endPoint, 4, Color4F::BLUE);
+
+			Vec2 from = ((_startPoint - _endPoint).getPerp()) * 10000.0f + (_startPoint + _endPoint) /2;
+			Vec2 to = ((_startPoint - _endPoint).getRPerp()) * 10000.0f + (_startPoint + _endPoint) / 2;
+
+			_paper->_debug->drawSegment(from, to, 1, Color4F::BLACK);
+		}
 //        endPoint = i->getLocation();
 //
 //        Vec2 center = Director::getInstance()->getVisibleSize() / 2;
@@ -68,6 +94,15 @@ void MainScene::onTouchesMoved(const vector<Touch*> &touches, cocos2d::Event *e)
 
 void MainScene::onTouchesEnded(const vector<Touch*> &touches, cocos2d::Event *e) {
     for (auto &t : touches) {
+		if (_touchId == t->getID()) {
+			_touchId = -1;
+			
+			_endPoint = _paper->convertToNodeSpace(t->getLocation());
+
+			_paper->_debug->clear();
+			_paper->_debug->drawDot(_startPoint, 4, Color4F::GREEN);
+			_paper->_debug->drawDot(_endPoint, 4, Color4F::BLUE);
+		}
 //        endPoint = i->getLocation();
         
 //        Vec2 center = Director::getInstance()->getVisibleSize() / 2;

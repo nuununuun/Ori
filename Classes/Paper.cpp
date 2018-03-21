@@ -1,4 +1,4 @@
-//
+﻿//
 //  Paper.cpp
 //  Ori
 //
@@ -33,13 +33,15 @@ bool Paper::init(int size) {
     this->addChild(poly);
     
     _polygons.push_back(poly);
+
+	_debug = DrawNode::create();
+	this->addChild(_debug);
     
     return true;
 }
 
-void Paper::findVertex(const cocos2d::Vec2 &pos) {
-    CPolygon *polygon = nullptr;
-    Vec2 *minVertex;
+Vec2 * Paper::findVertex(const cocos2d::Vec2 &pos, CPolygon **polygon) {
+    Vec2 * ret = nullptr;
     float minLength = INT_MAX;
     // 폴리곤들 내부
     for (auto &poly : _polygons) {
@@ -49,15 +51,17 @@ void Paper::findVertex(const cocos2d::Vec2 &pos) {
             float len = (vertex - pos).getLengthSq();
             // 입력받은 점에서 가장 짧은 정점을 찾음
             if (minLength > len) {
-                polygon = poly;
-                minVertex = &vertex;
+				if (polygon != nullptr) *polygon = poly;
+                ret = &vertex;
                 minLength = len;
             }
         }
     }
     
     if (minLength <= 400) {
-        *minVertex = pos;
-        polygon->draw(_fillColor, _borderColor, _width);
+        //*minVertex = pos;
+        //polygon->draw(_fillColor, _borderColor, _width);
     }
+
+	return ret;
 }

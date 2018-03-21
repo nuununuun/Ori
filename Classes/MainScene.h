@@ -7,23 +7,23 @@
 
 class MainScene : public cocos2d::Scene {
 public:
+	CREATE_FUNC(MainScene);
+
 	virtual bool init();
     
     void onTouchesBegan(const std::vector<cocos2d::Touch*> &t, cocos2d::Event *e);
     void onTouchesMoved(const std::vector<cocos2d::Touch*> &t, cocos2d::Event *e);
     void onTouchesEnded(const std::vector<cocos2d::Touch*> &t, cocos2d::Event *e);
-    
-    Paper * _paper;
-    
-    cocos2d::Vec2 startPoint, endPoint;
-    
-    cocos2d::Label *test;
-    
-    int buttonId = -1;
-    
-    int action = -1; // 0: lu, 1: ru, 2: ld, 3: rd
-    
-	CREATE_FUNC(MainScene);
+
+public:
+	Paper * _paper;
+
+	cocos2d::Vec2 _startPoint = cocos2d::Vec2::ZERO, _endPoint = cocos2d::Vec2::ZERO;
+
+	cocos2d::Label *test;
+
+	int _touchId = -1;
+
 };
 
 #endif

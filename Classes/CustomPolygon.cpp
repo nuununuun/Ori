@@ -101,7 +101,7 @@ Vec2 CustomPolygon::getSymmetricPoint(float a, float b, const Vec2 &p) {
 	return Vec2((2 * a * p.y - (a * a - 1) * p.x - 2 * a * b) / (a * a + 1), (2 * a * p.x + (a * a - 1) * p.y + 2 * b) / (a * a + 1));
 }
 
-// 만드는 중..
+// 만드??�?.
 void CustomPolygon::splitPolygon(const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v2, const cocos2d::Vec2 &p1, const cocos2d::Vec2 &p2) {
     vector<Vec2> splitVertices[2];
     
@@ -111,7 +111,7 @@ void CustomPolygon::splitPolygon(const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v
         auto interVert = Vec2::getIntersectPoint(vertices[(i + 1) % vertices.size()], vertices[i], v2, v1);
         
         
-        if (Vec2::isSegmentIntersect(vertices[(i + 1) % vertices.size()], vertices[i], v2, v1)) { // 겹치는 점이 있으면
+        if (Vec2::isSegmentIntersect(vertices[(i + 1) % vertices.size()], vertices[i], v2, v1)) { // 겹치???�이 ?�으�?
             splitVertices[0].push_back(interVert);
             splitVertices[1].push_back(interVert);
             
@@ -131,7 +131,7 @@ void CustomPolygon::splitPolygon(const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v
         }
         
         for (int i = 0; i < vertices.size(); i++) {
-            float angle = (CC_RADIANS_TO_DEGREES((center - vertices[i]).getAngle()) + 180 + corr); // 0 ~ 360으로 만듦
+            float angle = (CC_RADIANS_TO_DEGREES((center - vertices[i]).getAngle()) + 180 + corr); // 0 ~ 360?�로 만듦
             if (angle >= 360) angle -= 360;
             
             if (angle > 180) {
@@ -151,10 +151,10 @@ void CustomPolygon::splitPolygon(const cocos2d::Vec2 &v1, const cocos2d::Vec2 &v
         
         for (int i = 0; i < 2; i++) {
             sort(splitVertices[i].begin(), splitVertices[i].end(), [&](const Vec2 &v1, const Vec2 &v2)->bool {
-                float angle1 = (CC_RADIANS_TO_DEGREES((center - v1).getAngle()) + 180 + corr); // 0 ~ 360으로 만듦
+                float angle1 = (CC_RADIANS_TO_DEGREES((center - v1).getAngle()) + 180 + corr); // 0 ~ 360?�로 만듦
                 if (angle1 >= 360) angle1 -= 360;
             
-                float angle2 = (CC_RADIANS_TO_DEGREES((center - v2).getAngle()) + 180 + corr); // 0 ~ 360으로 만듦
+                float angle2 = (CC_RADIANS_TO_DEGREES((center - v2).getAngle()) + 180 + corr); // 0 ~ 360?�로 만듦
                 if (angle2 >= 360) angle2 -= 360;
             
                 return angle1 < angle2;
@@ -172,7 +172,7 @@ array<CustomPolygon *, 2> CustomPolygon::cutPolygon(int action, const Vec2 & v1,
 	splittedEdges.clear();
 	edgesOnLine.clear();
 
-	/// øß¡ˆ ∏∏µÈ±‚
+	/// øß¡? ?�∏µÈ±??
 	for (int i = 0; i < vertices.size(); i++) {
 		int edgeStartSide = checkEdgeSide(v1, v2, vertices[i]);
 		int edgeEndSide = checkEdgeSide(v1, v2, vertices[(i + 1) % vertices.size()]);
@@ -196,7 +196,7 @@ array<CustomPolygon *, 2> CustomPolygon::cutPolygon(int action, const Vec2 & v1,
 	splittedEdges.back().next = &splittedEdges.front();
 	splittedEdges.front().prev = &splittedEdges.back();
 
-	/// øß¡ˆ ¡§∑ƒ«œ±‚
+	/// øß¡? ¡§?�ƒ«œ±�?
 	std::sort(edgesOnLine.begin(), edgesOnLine.end(), [&](Edge *e1, Edge *e2) {
 		return calcSignedDistance(v1, v2, e1->start) <= calcSignedDistance(v1, v2, e2->start);
 	});
@@ -205,7 +205,7 @@ array<CustomPolygon *, 2> CustomPolygon::cutPolygon(int action, const Vec2 & v1,
 		edgesOnLine[i]->dist = edgesOnLine[i]->start.getDistance(edgesOnLine[0]->start);
 	}
 
-	/// ¥Ÿ∏Æ ∏∏µÈ±‚	
+	/// ¥Ÿ?��??�∏µÈ±??
 	Edge *useSrc = nullptr;
 	for (int i = 0; i < edgesOnLine.size(); i++) {
 
@@ -305,7 +305,7 @@ void CustomPolygon::cutPolygonPreview(int action, const Vec2 & v1, const Vec2 & 
     splittedEdges.clear();
     edgesOnLine.clear();
     
-    /// øß¡ˆ ∏∏µÈ±‚
+    /// øß¡? ?�∏µÈ±??
     for (int i = 0; i < vertices.size(); i++) {
         int edgeStartSide = checkEdgeSide(v1, v2, vertices[i]);
         int edgeEndSide = checkEdgeSide(v1, v2, vertices[(i + 1) % vertices.size()]);
@@ -329,7 +329,7 @@ void CustomPolygon::cutPolygonPreview(int action, const Vec2 & v1, const Vec2 & 
     splittedEdges.back().next = &splittedEdges.front();
     splittedEdges.front().prev = &splittedEdges.back();
     
-    /// øß¡ˆ ¡§∑ƒ«œ±‚
+    /// øß¡? ¡§?�ƒ«œ±�?
     std::sort(edgesOnLine.begin(), edgesOnLine.end(), [&](Edge *e1, Edge *e2) {
         return calcSignedDistance(v1, v2, e1->start) <= calcSignedDistance(v1, v2, e2->start);
     });
@@ -338,7 +338,7 @@ void CustomPolygon::cutPolygonPreview(int action, const Vec2 & v1, const Vec2 & 
         edgesOnLine[i]->dist = edgesOnLine[i]->start.getDistance(edgesOnLine[0]->start);
     }
     
-    /// ¥Ÿ∏Æ ∏∏µÈ±‚
+    /// ¥Ÿ?��??�∏µÈ±??
     Edge *useSrc = nullptr;
     for (int i = 0; i < edgesOnLine.size(); i++) {
         
