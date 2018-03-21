@@ -10,7 +10,6 @@
 #define CustomPolygon_h
 
 #include "cocos2d.h"
-#include "CustomDrawNode.h"
 #include <vector>
 #include <list>
 #include <array>

@@ -8,11 +8,8 @@
 
 #include "CustomPolygon.h"
 
-#include "clipper.hpp"
-
 USING_NS_CC;
 using namespace std;
-using namespace ClipperLib;
 
 CustomPolygon *CustomPolygon::create() {
     CustomPolygon * ret = new (std::nothrow) CustomPolygon();

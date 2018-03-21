@@ -1,99 +1,74 @@
 #include "MainScene.h"
 
-#include "clipper.hpp"
+#include "InputManager.h"
 
 USING_NS_CC;
 using namespace std;
-using namespace ClipperLib;
 
-bool MainScene::init()
-{
-	if (!Layer::init()) return false;
-    
-    auto bg = LayerColor::create(Color4B(255, 255, 255, 255));
-    addChild(bg);
+bool MainScene::init() {
+    auto bg = LayerColor::create(Color4B::WHITE);
+    this->addChild(bg);
 
 	Vec2 center = Director::getInstance()->getVisibleSize() / 2;
-	int size = 200;
     
-    //-- 기본 사각형 버텍스 --//
-    vector<Vec2> v;
-    v.push_back(Vec2(-size / 2, -size / 2));
-    v.push_back(Vec2(size / 2, -size / 2));
-    v.push_back(Vec2(size / 2, size / 2));
-    v.push_back(Vec2(-size / 2, size / 2));
+    int size = 200;
     
-    auto paper = CustomPolygon::create(v);
+    _paper = Paper::create(size);
+    _paper->setPosition(center);
+    this->addChild(_paper);
     
-    paper->head = true;
-    paper->drawPolygon();
-    
-    addChild(paper);
-    
-    auto listener = EventListenerTouchAllAtOnce::create();
-    listener->onTouchesBegan = CC_CALLBACK_2(MainScene::onTouchesBegan, this);
-    listener->onTouchesMoved = CC_CALLBACK_2(MainScene::onTouchesMoved, this);
-    listener->onTouchesEnded = CC_CALLBACK_2(MainScene::onTouchesEnded, this);
-    
-    getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
-    
-    test = Label::createWithSystemFont("0", "", 20);
-    test->setTextColor(Color4B::BLACK);
-    test->setAnchorPoint((Vec2(0, 1)));
-    test->setName("test");
-    test->setPosition(10, center.y * 2 - 10);
-    addChild(test);
-    
-    papers.push_back(paper);
-
-	/// Debug ///
+    InputManager::getInstance()->initialize(this);
+    InputManager::getInstance()->setTouchesEventCallback(CC_CALLBACK_2(MainScene::onTouchesBegan, this), "began");
+    InputManager::getInstance()->setTouchesEventCallback(CC_CALLBACK_2(MainScene::onTouchesMoved, this), "moved");
+    InputManager::getInstance()->setTouchesEventCallback(CC_CALLBACK_2(MainScene::onTouchesEnded, this), "ended");
     
 	return true;
 }
 
-void MainScene::onTouchesBegan(const vector<Touch*> &t, cocos2d::Event *e) {
+void MainScene::onTouchesBegan(const vector<Touch*> &touches, cocos2d::Event *e) {
     
-    for (auto &i : t) {
-        startPoint = i->getLocation();
+    for (auto &t : touches) {
+        _paper->findVertex(_paper->convertToNodeSpace(t->getLocation()));
     }
+    
 }
 
-void MainScene::onTouchesMoved(const vector<Touch*> &t, cocos2d::Event *e) {
+void MainScene::onTouchesMoved(const vector<Touch*> &touches, cocos2d::Event *e) {
 
-    for (auto &i : t) {
-        endPoint = i->getLocation();
-        
-        Vec2 center = Director::getInstance()->getVisibleSize() / 2;
-        
-        Vec2 a = startPoint - center;
-        Vec2 b = endPoint - center;
-        
-        if (startPoint.fuzzyEquals(endPoint, 1)) continue;
-            
-        Vec2 normalVector = (a - b).getPerp();
-            
-        auto c = a - b;
-        if (action == -1) {
-            if (c.x > 0 && c.y < 0) action = 0;
-            if (c.x < 0 && c.y < 0) action = 1;
-            if (c.x > 0 && c.y > 0) action = 2;
-            if (c.x < 0 && c.y > 0) action = 3;
-        }
+    for (auto &t : touches) {
+//        endPoint = i->getLocation();
+//
+//        Vec2 center = Director::getInstance()->getVisibleSize() / 2;
+//
+//        Vec2 a = startPoint - center;
+//        Vec2 b = endPoint - center;
+//
+//        if (startPoint.fuzzyEquals(endPoint, 1)) continue;
+//
+//        Vec2 normalVector = (a - b).getPerp();
+//
+//        auto c = a - b;
+//        if (action == -1) {
+//            if (c.x > 0 && c.y < 0) action = 0;
+//            if (c.x < 0 && c.y < 0) action = 1;
+//            if (c.x > 0 && c.y > 0) action = 2;
+//            if (c.x < 0 && c.y > 0) action = 3;
+//        }
 //        if (action == 0) test->setString("leftup");
 //        else if (action == 1) test->setString("rightup");
 //        else if (action == 2) test->setString("leftdown");
 //        else if (action == 3) test->setString("rightdown");
             
-        for (auto j : papers) {
-            j->cutPolygonPreview(action, -normalVector * 1000 + (a + b) / 2, normalVector * 1000 + (a + b) / 2, a, b);
-            j->drawPreview();
-        }
+//        for (auto j : papers) {
+//            j->cutPolygonPreview(action, -normalVector * 1000 + (a + b) / 2, normalVector * 1000 + (a + b) / 2, a, b);
+//            j->drawPreview();
+//        }
     }
 }
 
-void MainScene::onTouchesEnded(const vector<Touch*> &t, cocos2d::Event *e) {
-    for (auto &i : t) {
-        endPoint = i->getLocation();
+void MainScene::onTouchesEnded(const vector<Touch*> &touches, cocos2d::Event *e) {
+    for (auto &t : touches) {
+//        endPoint = i->getLocation();
         
 //        Vec2 center = Director::getInstance()->getVisibleSize() / 2;
 //        
@@ -131,6 +106,6 @@ void MainScene::onTouchesEnded(const vector<Touch*> &t, cocos2d::Event *e) {
 ////        }
 
         
-        action = -1;
+//        action = -1;
     }
 }
