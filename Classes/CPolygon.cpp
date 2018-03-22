@@ -26,6 +26,8 @@ bool CPolygon::initWithVertices(const vector<Vec2> &vertices) {
     _drawer = DrawNode::create();
     this->addChild(_drawer);
     
+    createEdges();
+    
     return true;
 }
 
@@ -46,4 +48,11 @@ void CPolygon::symmetry(const Vec2 &start, const Vec2 &end) {
 
 Vec2 CPolygon::getSymmetricVertex(float a, float b, const Vec2 &p) {
 	return Vec2((2 * a * p.y - (a * a - 1) * p.x - 2 * a * b) / (a * a + 1), (2 * a * p.x + (a * a - 1) * p.y + 2 * b) / (a * a + 1));
+}
+
+void CPolygon::createEdges() {
+    int vSize = _vertices.size();
+    for (int i = 0; i < vSize; i++) {
+        _edges.push_back(Edge(&_vertices[i], &_vertices[(i + 1) % vSize]));
+    }
 }

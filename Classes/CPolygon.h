@@ -10,6 +10,15 @@
 
 #include "cocos2d.h"
 
+class Edge {
+public:
+    cocos2d::Vec2 * from, * to;
+    
+public:
+    Edge(cocos2d::Vec2 * from, cocos2d::Vec2 * to) : from(from), to(to) {}
+    
+};
+
 class CPolygon : public cocos2d::Node {
 public:
     static CPolygon * create(const std::vector<cocos2d::Vec2> &vertices);
@@ -22,11 +31,14 @@ public:
     
 public:
     std::vector<cocos2d::Vec2> _vertices;
+    std::vector<Edge> _edges;
     
     cocos2d::DrawNode * _drawer;
 
 protected:
 	cocos2d::Vec2 getSymmetricVertex(float a, float b, const cocos2d::Vec2 &p);
+    
+    void createEdges();
     
 };
 

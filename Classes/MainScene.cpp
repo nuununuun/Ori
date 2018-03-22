@@ -35,13 +35,8 @@ void MainScene::onTouchesBegan(const vector<Touch*> &touches, cocos2d::Event *e)
 
 		_paper->_debug->clear();
 		_paper->_debug->drawDot(_startPoint, 4, Color4F::GREEN);
-		_paper->_debug->drawDot(_endPoint, 4, Color4F::BLUE);
-
-
-		auto ret = _paper->findVertex(_startPoint, nullptr);
-		if (ret != nullptr) {
-			_paper->_debug->drawDot(*ret, 8, Color4F::ORANGE);
-		}
+        
+        _paper->selectPolygon(_startPoint);
     }
     
 }
@@ -54,41 +49,17 @@ void MainScene::onTouchesMoved(const vector<Touch*> &touches, cocos2d::Event *e)
 			_endPoint = _paper->convertToNodeSpace(t->getLocation());
 
 			_paper->_debug->clear();
-			_paper->_debug->drawDot(_startPoint, 4, Color4F::GREEN);
-			_paper->_debug->drawDot(_endPoint, 4, Color4F::BLUE);
-
-			Vec2 from = ((_startPoint - _endPoint).getPerp()) * 10000.0f + (_startPoint + _endPoint) /2;
-			Vec2 to = ((_startPoint - _endPoint).getRPerp()) * 10000.0f + (_startPoint + _endPoint) / 2;
-
-			_paper->_debug->drawSegment(from, to, 1, Color4F::BLACK);
+            if (_paper->_selectMode != 0) {
+                
+                Vec2 from = ((_startPoint - _endPoint).getPerp()) * 10000.0f + (_startPoint + _endPoint) /2;
+                Vec2 to = ((_startPoint - _endPoint).getRPerp()) * 10000.0f + (_startPoint + _endPoint) / 2;
+                _paper->_debug->drawSegment(from, to, 1, Color4F::BLACK);
+                
+                _paper->_debug->drawDot(_startPoint, 4, Color4F::GREEN);
+                _paper->_debug->drawDot(_endPoint, 4, Color4F::BLUE);
+                
+            }
 		}
-//        endPoint = i->getLocation();
-//
-//        Vec2 center = Director::getInstance()->getVisibleSize() / 2;
-//
-//        Vec2 a = startPoint - center;
-//        Vec2 b = endPoint - center;
-//
-//        if (startPoint.fuzzyEquals(endPoint, 1)) continue;
-//
-//        Vec2 normalVector = (a - b).getPerp();
-//
-//        auto c = a - b;
-//        if (action == -1) {
-//            if (c.x > 0 && c.y < 0) action = 0;
-//            if (c.x < 0 && c.y < 0) action = 1;
-//            if (c.x > 0 && c.y > 0) action = 2;
-//            if (c.x < 0 && c.y > 0) action = 3;
-//        }
-//        if (action == 0) test->setString("leftup");
-//        else if (action == 1) test->setString("rightup");
-//        else if (action == 2) test->setString("leftdown");
-//        else if (action == 3) test->setString("rightdown");
-            
-//        for (auto j : papers) {
-//            j->cutPolygonPreview(action, -normalVector * 1000 + (a + b) / 2, normalVector * 1000 + (a + b) / 2, a, b);
-//            j->drawPreview();
-//        }
     }
 }
 
@@ -98,49 +69,13 @@ void MainScene::onTouchesEnded(const vector<Touch*> &touches, cocos2d::Event *e)
 			_touchId = -1;
 			
 			_endPoint = _paper->convertToNodeSpace(t->getLocation());
-
-			_paper->_debug->clear();
-			_paper->_debug->drawDot(_startPoint, 4, Color4F::GREEN);
-			_paper->_debug->drawDot(_endPoint, 4, Color4F::BLUE);
+            
+            if (_paper->_selectMode != 0) {
+                Vec2 from = ((_startPoint - _endPoint).getPerp()) * 10000.0f + (_startPoint + _endPoint) /2;
+                Vec2 to = ((_startPoint - _endPoint).getRPerp()) * 10000.0f + (_startPoint + _endPoint) / 2;
+                
+                _paper->splitPolygon(from, to);
+            }
 		}
-//        endPoint = i->getLocation();
-        
-//        Vec2 center = Director::getInstance()->getVisibleSize() / 2;
-//        
-//        Vec2 a = startPoint - center;
-//        Vec2 b = endPoint - center;
-//        
-//        if (startPoint.fuzzyEquals(endPoint, 1)) continue;
-//        
-//        
-//        auto c = a - b;
-//        
-//        Vec2 normalVector = c.getPerp();
-//        
-//        vector<CustomPolygon *> splittedPolygons;
-//        
-//        for (auto &j : papers) {
-//            auto cutted = j->cutPolygon(action, -normalVector * 1000 + (a + b) / 2, normalVector * 1000 + (a + b) / 2, a, b);
-//            j->drawPreview();
-//            
-////            for (auto j : cutted) {
-////                splittedPolygons.push_back(j);
-//            //            }
-//            papers.push_back(cutted[0]);
-//            papers.push_back(cutted[1]);
-//        }
-//        
-////        for (auto i : papers) {
-////            i->;
-////        }
-//        
-////        papers.clear();
-////        
-////        for (auto &i : splittedPolygons) {
-////            papers.push_back(i);
-////        }
-
-        
-//        action = -1;
     }
 }
