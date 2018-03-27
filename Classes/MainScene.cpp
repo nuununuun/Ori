@@ -58,6 +58,12 @@ void MainScene::onTouchesMoved(const vector<Touch*> &touches, cocos2d::Event *e)
                 _paper->_debug->drawDot(_startPoint, 4, Color4F::GREEN);
                 _paper->_debug->drawDot(_endPoint, 4, Color4F::BLUE);
                 
+                if (_paper->_selectMode == 1) {
+                    _paper->_debug->drawDot(*_paper->_selectedVertex, 4, Color4F::ORANGE);
+                    
+                } else if (_paper->_selectMode == 2) {
+                    _paper->_debug->drawSegment(*(*_paper->_selectedEdge).from, *(*_paper->_selectedEdge).to, 2, Color4F::GREEN);
+                }
             }
 		}
     }

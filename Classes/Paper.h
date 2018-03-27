@@ -12,6 +12,12 @@
 
 #include "CPolygon.h"
 
+typedef enum _SelectType {
+    NOTHING = 0,
+    VERTEX = 1,
+    EDGE = 2,
+} SelectType;
+
 class Paper : public cocos2d::Node {
 public:
     static Paper * create(int size);
@@ -30,18 +36,21 @@ protected:
     cocos2d::Vec2 * findVertex(const cocos2d::Vec2 &pos, CPolygon **polygon);
     Edge * findEdge(const cocos2d::Vec2 &pos, CPolygon **polygon);
     
+    bool isEqualEdges(const cocos2d::Vec2 &fedge1, const cocos2d::Vec2 &tedge1, const cocos2d::Vec2 &fedge2, const cocos2d::Vec2 &tedge2);
+    
 protected:
     std::vector<CPolygon *> _polygons;
     
     cocos2d::Color4F \
-        _fillColor = cocos2d::Color4F(1.0f, 0.3f, 0.3f, 1.0f),
+        _frontColor  = cocos2d::Color4F(1.0f, 0.3f, 0.3f, 1.0f),
+        _backColor   = cocos2d::Color4F(1.0f, 0.4f, 0.35f, 1.0f),
         _borderColor = cocos2d::Color4F(0.75f, 0.25f, 0.25f, 1.0f);
     
     float _width = 1.0f;
     
 public:
     // 0 = nothing, 1 = vertex, 2 = edge
-    int _selectMode = 0;
+    SelectType _selectMode = NOTHING;
     
     cocos2d::Vec2 * _selectedVertex;
     Edge * _selectedEdge;
